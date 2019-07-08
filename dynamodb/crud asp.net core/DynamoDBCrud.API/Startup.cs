@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DynamoDBCrud.Core.Contracts;
+using DynamoDBCrud.Core.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +16,7 @@ namespace DynamoDBCrud.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+            services.AddTransient<IClienteRepository, ClienteRepositoryOMP>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
