@@ -5,8 +5,15 @@ namespace DynamoDBCrud.Core.Models
     [DynamoDBTable("clientes")]
     public class Cliente
     {
-        public string email { get; set; }
-        public string nome { get; set; }
+        [DynamoDBProperty("email")]
+        public string Email { get; set; }
+
+        [DynamoDBProperty("nome")]
+        public string Nome { get; set; }
+
+        [DynamoDBGlobalSecondaryIndexHashKey]
+        [DynamoDBProperty("sobrenome")]
+        public string Sobrenome { get; set; }
 
     }
 
