@@ -1,0 +1,10 @@
+	Assembly: helloworld (dll gerada no build)
+	
+    NAMESPACE
+        Namespace: HelloWorld (namespace da classe)
+	    Class: HelloWorldHandler (nome da classe)
+	
+    METHOD: Handle (método da classe)
+
+Subir na AWS esse handler (ASSEMBLY::NAMESPACE::METHOD):
+helloworld::HelloWorld.HelloWorldHandler::Handle
