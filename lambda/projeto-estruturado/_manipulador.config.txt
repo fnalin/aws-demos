@@ -1,0 +1,2 @@
+ASSEMBLY::NAMESPACE::METHOD
+Fansoft.CodEstruturado.Core::Fansoft.CodEstruturado.Core.Handler::Handle
