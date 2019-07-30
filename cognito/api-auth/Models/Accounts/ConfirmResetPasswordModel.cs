@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace fansoftapi.Models.Accounts
 {
 
-    public class ConfirmModel
+    public class ConfirmResetPasswordModel
     {
         [Required(ErrorMessage = "Campo obrigatório")]
         [EmailAddress(ErrorMessage = "email inválido")]
@@ -11,7 +11,10 @@ namespace fansoftapi.Models.Accounts
 
         [Required(ErrorMessage = "Campo obrigatório")]
         public string Code { get; set; }
-        
+
+
+        [Required(ErrorMessage = "Campo obrigatório")]
+        public string NewPassword { get; set; }
     }
 
 }

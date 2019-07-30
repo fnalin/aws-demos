@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
@@ -11,7 +7,6 @@ using fansoftapi.Models.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -30,7 +25,6 @@ namespace fansoftapi
         {
             services.AddMvc();
 
-            // https://aws.amazon.com/pt/blogs/developer/introducing-the-asp-net-core-identity-provider-preview-for-amazon-cognito/
             services.AddCognitoIdentity(config => {
                 config.Password = new Microsoft.AspNetCore.Identity.PasswordOptions{
                     RequireDigit = false,
@@ -48,8 +42,7 @@ namespace fansoftapi
             services.AddSingleton<IAmazonCognitoIdentityProvider>(provider);
 
             var cognitoUserPool = new CognitoUserPool("POOL_ID", "CLIENT_ID", provider, "CLIENT_SECRET_KEY");
-            services.AddSingleton<CognitoUserPool>(cognitoUserPool);
-
+            
             services.AddSingleton<CognitoUserPool>(cognitoUserPool);
 
             var securitySettingsConfig = _config.GetSection("SecuritySettings");

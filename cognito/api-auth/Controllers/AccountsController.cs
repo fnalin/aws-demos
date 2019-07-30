@@ -1,22 +1,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.AspNetCore.Identity.Cognito;
-using Amazon.CognitoIdentityProvider.Model;
 using Amazon.Extensions.CognitoAuthentication;
 using fansoftapi.Models.Accounts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using fansoftapi.Models.Options;
 using Microsoft.Extensions.Options;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Security.Claims;
 
 namespace fansoftapi.Controllers
 {
-
 
     [Route("api/v1/accounts")]
     public class AccountController : ControllerBase
@@ -76,7 +69,6 @@ namespace fansoftapi.Controllers
             }
 
             var result = await (_userManager as CognitoUserManager<CognitoUser>)
-                    //ConfirmEmailAsync(user, model.Code);
                     .ConfirmSignUpAsync(user, model.Code, true).ConfigureAwait(false);
 
             if (result.Succeeded) return Ok();
@@ -88,73 +80,66 @@ namespace fansoftapi.Controllers
 
         }
 
+        // https://github.com/aws/aws-aspnet-cognito-identity-provider/blob/master/docs/5-User%20Management%20-%20Change%20and%20reset%20passwords.md
+        [HttpPost("changepassword")]
+        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        [HttpPost("signin")]
-        public async Task<IActionResult> SignIn([FromBody]LoginModel model)
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            var result = await (_userManager as CognitoUserManager<CognitoUser>)
+                    .ChangePasswordAsync(user,model.OldPassword,model.NewPassword);
+
+            if (result.Succeeded) return Ok();
+
+            result.Errors.ToList().ForEach(u => ModelState.AddModelError(u.Code, u.Description));
+
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("forgotpassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody]ForgotPasswordModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            var result = await (_userManager as CognitoUserManager<CognitoUser>)
+                    .ResetPasswordAsync(user);
+
+           if (result.Succeeded) return Ok();
+
+            result.Errors.ToList().ForEach(u => ModelState.AddModelError(u.Code, u.Description));
+
+            return BadRequest(ModelState);
+        }
+
+
+        [HttpPost("confirmresetpassword")]
+        public async Task<IActionResult> ConfirmResetPassword([FromBody]ConfirmResetPasswordModel model)
         {
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
+            var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
+
+            if (user == null)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-                if (result.Succeeded) {
-                    var token = await gerarJwtAsync(model.Email);
-                    return Ok(token);
-                }
-            }
-            catch (UserNotConfirmedException)
-            {
-                return Unauthorized("Usuário ainda não possui acesso pois seu e-mail ainda não foi confirmado");
-            }
-            catch (System.Exception ex)
-            {
-                // Internal Error Server
-                // Logar
-                HttpContext.Response.StatusCode = 500;
-                return new ObjectResult(ex.Message);
+                ModelState.AddModelError("NotFound", "Usuário não encontrado com esse email");
+                return BadRequest(ModelState);
             }
 
+            var result = await (_userManager as CognitoUserManager<CognitoUser>)
+                    .ResetPasswordAsync(user, model.Code, model.NewPassword);
 
+            if (result.Succeeded) return Ok();
 
-            ModelState.AddModelError("Email", "Email ou senha inválidos");
-            ModelState.AddModelError("Password", "Email ou senha inválidos");
+            result.Errors.ToList().ForEach(u => ModelState.AddModelError(u.Code, u.Description));
+
             return BadRequest(ModelState);
         }
 
-        private async Task<string> gerarJwtAsync(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-
-            var key = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(_securitySettings.Secret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
-               {
-                     new Claim("id", user.UserID),
-                     new Claim("name", user.Attributes["name"]),
-                     new Claim("email", email),
-                     
-                     //new Claim(ClaimTypes.Role, "Admin")
-                     // p/ policy:
-                     // new Claim("permissions", policy)
-                };
-
-        var token = new JwtSecurityToken(
-                issuer: _securitySettings.Emissor,
-                audience: _securitySettings.ValidoEm,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(5), //DateTime.UtcNow.AddHours(_securitySettings.ExpiracaoHoras)
-                notBefore: DateTime.UtcNow,
-                signingCredentials: creds);
-
-
-            
-            return new JwtSecurityTokenHandler().WriteToken(token);
-
-        }
-
     }
-
 
 }

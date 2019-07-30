@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace fansoftapi.Models.Accounts
+namespace fansoftapi.Models.Auth
 {
     public class LoginModel 
     {
