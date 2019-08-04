@@ -5,8 +5,6 @@ using Amazon.Extensions.CognitoAuthentication;
 using fansoftapi.Models.Accounts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using fansoftapi.Models.Options;
-using Microsoft.Extensions.Options;
 
 namespace fansoftapi.Controllers
 {
@@ -18,17 +16,13 @@ namespace fansoftapi.Controllers
         private readonly UserManager<CognitoUser> _userManager;
         private readonly CognitoUserPool _pool;
 
-        private readonly SecuritySettings _securitySettings;
-
         public AccountController(
-                SignInManager<CognitoUser> signInManager, UserManager<CognitoUser> userManager, CognitoUserPool pool,
-                IOptions<SecuritySettings> securitySettings
+                SignInManager<CognitoUser> signInManager, UserManager<CognitoUser> userManager, CognitoUserPool pool
             )
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _pool = pool;
-            _securitySettings = securitySettings.Value;
         }
 
 
@@ -80,7 +74,6 @@ namespace fansoftapi.Controllers
 
         }
 
-        // https://github.com/aws/aws-aspnet-cognito-identity-provider/blob/master/docs/5-User%20Management%20-%20Change%20and%20reset%20passwords.md
         [HttpPost("changepassword")]
         public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordModel model)
         {
